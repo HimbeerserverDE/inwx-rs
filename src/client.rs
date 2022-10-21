@@ -1,6 +1,7 @@
 use crate::{call, response};
 use crate::{Error, Result};
 
+use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use reqwest::{blocking, Url};
@@ -73,7 +74,8 @@ impl Client {
                 match code {
                     xmlrpc::Value::Int(code) => {
                         if expected.contains(code) {
-                            let data = map.get("resData").ok_or(Error::Inexistent("resData"))?;
+                            let default = &xmlrpc::Value::Struct(BTreeMap::new());
+                            let data = map.get("resData").unwrap_or(default);
 
                             match data {
                                 xmlrpc::Value::Struct(response) => Ok(response::Response {
