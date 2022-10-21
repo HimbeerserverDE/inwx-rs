@@ -1,5 +1,7 @@
 use crate::{Error, Result};
 
+use std::sync::Arc;
+
 use reqwest::Url;
 
 /// The INWX environment to use. The Sandbox is good for testing
@@ -24,4 +26,19 @@ impl TryInto<Url> for Endpoint {
         let url = Url::parse(self.into())?;
         Ok(url)
     }
+}
+
+/// A synchronous client to make API calls with.
+/// You do **not** need to wrap it in an `Arc` or `Rc`
+/// because it already uses an `Arc` internally.
+/// [`Rc`]: std::rc::Rc
+pub struct Client {
+    inner: Arc<ClientRef>,
+}
+
+impl Client {}
+
+// The underlying data of a `Client`.
+struct ClientRef {
+    http: reqwest::Client,
 }
