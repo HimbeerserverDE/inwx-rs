@@ -22,8 +22,12 @@ impl From<Login<'_>> for xmlrpc::Value {
 }
 
 impl Call for Login<'_> {
-    fn method_name(&self) -> &'static str { "account.login" }
-    fn expected(&self) -> &'static [i32] { &[1000] }
+    fn method_name(&self) -> &'static str {
+        "account.login"
+    }
+    fn expected(&self) -> &'static [i32] {
+        &[1000]
+    }
 }
 
 // Contains no information. This just signals to the server
@@ -37,6 +41,10 @@ impl From<Logout> for xmlrpc::Value {
 }
 
 impl Call for Logout {
-    fn method_name(&self) -> &'static str { "account.logout" }
-    fn expected(&self) -> &'static [i32] { &[1500] }
+    fn method_name(&self) -> &'static str {
+        "account.logout"
+    }
+    fn expected(&self) -> &'static [i32] {
+        &[1500]
+    }
 }

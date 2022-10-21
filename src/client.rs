@@ -7,6 +7,7 @@ use reqwest::{blocking, Url};
 
 /// The INWX environment to use. The Sandbox is good for testing
 /// or debugging purposes.
+#[derive(Clone, Copy, Debug)]
 pub enum Endpoint {
     Production,
     Sandbox,
@@ -21,9 +22,9 @@ impl From<Endpoint> for &str {
     }
 }
 
-impl Into<Url> for Endpoint {
-    fn into(self) -> Url {
-        Url::parse(self.into()).unwrap()
+impl From<Endpoint> for Url {
+    fn from(endpoint: Endpoint) -> Self {
+        Url::parse(endpoint.into()).unwrap()
     }
 }
 
@@ -58,47 +59,45 @@ impl Client {
     /// if successful and if the status code
     /// matches one of the expected status codes.
     pub fn call(&self, call: impl call::Call) -> Result<response::Response> {
-        let transport = self.inner.http.post(self.inner.endpoint.into());
+        let expected = call.expected();
 
-        let request = xmlrpc::Request::new(call.method_name());
-        request.arg(call);
+        let transport = self.inner.http.post::<Url>(self.inner.endpoint.into());
+
+        let request = xmlrpc::Request::new(call.method_name()).arg(call);
 
         let raw = request.call(transport)?;
         match raw {
             xmlrpc::Value::Struct(map) => {
-                let code = map.get("code")
-                    .ok_or(Error::Inexistent("code"))?;
+                let code = map.get("code").ok_or(Error::Inexistent("code"))?;
 
                 match code {
                     xmlrpc::Value::Int(code) => {
-                        if call.expected().contains(code) {
-                            let data = map.get("resData")
-                                .ok_or(Error::Inexistent("resData"))?;
+                        if expected.contains(code) {
+                            let data = map.get("resData").ok_or(Error::Inexistent("resData"))?;
 
                             match data {
-                                xmlrpc::Value::Struct(response) => {
-                                    Ok(response::Response {
-                                        status: *code,
-                                        data: response,
-                                    })
-                                },
-                                _ => Err(Error::Type("resData", "Struct")),
+                                xmlrpc::Value::Struct(response) => Ok(response::Response {
+                                    status: *code,
+                                    data: response.clone(),
+                                }),
+                                _ => Err(Error::Type("resData", "Struct", data.clone())),
                             }
                         } else {
-                            Err(Error::BadStatus(call.expected(), code))
+                            Err(Error::BadStatus(expected, *code))
                         }
-                    },
-                    _ => Err(Error::Type("code", "Int")),
+                    }
+                    _ => Err(Error::Type("code", "Int", code.clone())),
                 }
-            },
-            _ => Err(Error::BadResponse(raw)),
+            }
+            _ => Err(Error::BadResponse(raw.clone())),
         }
     }
 }
 
 impl Drop for Client {
     fn drop(&mut self) {
-        self.call(call::account::Logout);
+        // Ignore the result. Failed logout doesn't really matter.
+        self.call(call::account::Logout).ok();
     }
 }
 
