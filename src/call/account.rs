@@ -18,3 +18,13 @@ impl From<Login<'_>> for xmlrpc::Value {
         xmlrpc::Value::Struct(map)
     }
 }
+
+// Contains no information. This just signals to the server
+// that it should end the session.
+pub(crate) struct Logout;
+
+impl From<Logout> for xmlrpc::Value {
+    fn from(_logout: Logout) -> Self {
+        xmlrpc::Value::Nil
+    }
+}
