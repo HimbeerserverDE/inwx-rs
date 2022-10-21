@@ -55,6 +55,12 @@ impl Client {
     }
 }
 
+impl Drop for Client {
+    fn drop(&mut self) {
+        self.call(crate::call::account::Logout);
+    }
+}
+
 // The underlying data of a `Client`.
 struct ClientRef {
     http: reqwest::Client,
