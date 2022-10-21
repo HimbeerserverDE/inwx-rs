@@ -1,8 +1,9 @@
+use crate::{call, response};
 use crate::{Error, Result};
 
 use std::sync::Arc;
 
-use reqwest::Url;
+use reqwest::{blocking, Url};
 
 /// The INWX environment to use. The Sandbox is good for testing
 /// or debugging purposes.
@@ -20,11 +21,9 @@ impl From<Endpoint> for &str {
     }
 }
 
-impl TryInto<Url> for Endpoint {
-    type Error = Error;
-    fn try_into(self) -> Result<Url> {
-        let url = Url::parse(self.into())?;
-        Ok(url)
+impl Into<Url> for Endpoint {
+    fn into(self) -> Url {
+        Url::parse(self.into()).unwrap()
     }
 }
 
@@ -41,11 +40,12 @@ impl Client {
     pub fn login(ep: Endpoint, user: &str, pass: &str) -> Result<Client> {
         let client = Client {
             inner: Arc::new(ClientRef {
-                http: reqwest::Client::builder().cookie_store(true).build()?,
+                http: blocking::Client::builder().cookie_store(true).build()?,
+                endpoint: ep,
             }),
         };
 
-        client.call(crate::call::account::Login {
+        client.call(call::account::Login {
             user,
             pass,
             case_insensitive: false,
@@ -53,15 +53,57 @@ impl Client {
 
         Ok(client)
     }
+
+    /// Issues a `Call` and returns a `Response`
+    /// if successful and if the status code
+    /// matches one of the expected status codes.
+    pub fn call(&self, call: impl call::Call) -> Result<response::Response> {
+        let transport = self.inner.http.post(self.inner.endpoint.into());
+
+        let request = xmlrpc::Request::new(call.method_name());
+        request.arg(call);
+
+        let raw = request.call(transport)?;
+        match raw {
+            xmlrpc::Value::Struct(map) => {
+                let code = map.get("code")
+                    .ok_or(Error::Inexistent("code"))?;
+
+                match code {
+                    xmlrpc::Value::Int(code) => {
+                        if call.expected().contains(code) {
+                            let data = map.get("resData")
+                                .ok_or(Error::Inexistent("resData"))?;
+
+                            match data {
+                                xmlrpc::Value::Struct(response) => {
+                                    Ok(response::Response {
+                                        status: *code,
+                                        data: response,
+                                    })
+                                },
+                                _ => Err(Error::Type("resData", "Struct")),
+                            }
+                        } else {
+                            Err(Error::BadStatus(call.expected(), code))
+                        }
+                    },
+                    _ => Err(Error::Type("code", "Int")),
+                }
+            },
+            _ => Err(Error::BadResponse(raw)),
+        }
+    }
 }
 
 impl Drop for Client {
     fn drop(&mut self) {
-        self.call(crate::call::account::Logout);
+        self.call(call::account::Logout);
     }
 }
 
 // The underlying data of a `Client`.
 struct ClientRef {
-    http: reqwest::Client,
+    http: blocking::Client,
+    endpoint: Endpoint,
 }

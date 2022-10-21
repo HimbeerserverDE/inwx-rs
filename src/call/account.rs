@@ -1,3 +1,5 @@
+use super::Call;
+
 use std::collections::BTreeMap;
 
 // Contains login information. Used to create an API session.
@@ -19,6 +21,11 @@ impl From<Login<'_>> for xmlrpc::Value {
     }
 }
 
+impl Call for Login<'_> {
+    fn method_name(&self) -> &'static str { "account.login" }
+    fn expected(&self) -> &'static [i32] { &[1000] }
+}
+
 // Contains no information. This just signals to the server
 // that it should end the session.
 pub(crate) struct Logout;
@@ -27,4 +34,9 @@ impl From<Logout> for xmlrpc::Value {
     fn from(_logout: Logout) -> Self {
         xmlrpc::Value::Nil
     }
+}
+
+impl Call for Logout {
+    fn method_name(&self) -> &'static str { "account.logout" }
+    fn expected(&self) -> &'static [i32] { &[1500] }
 }
