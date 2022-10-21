@@ -36,7 +36,24 @@ pub struct Client {
     inner: Arc<ClientRef>,
 }
 
-impl Client {}
+impl Client {
+    /// Initialises a session and returns a `Client` if successful.
+    pub fn login(ep: Endpoint, user: &str, pass: &str) -> Result<Client> {
+        let client = Client {
+            inner: Arc::new(ClientRef {
+                http: reqwest::Client::builder().cookie_store(true).build()?,
+            }),
+        };
+
+        client.call(crate::call::account::Login {
+            user,
+            pass,
+            case_insensitive: false,
+        })?;
+
+        Ok(client)
+    }
+}
 
 // The underlying data of a `Client`.
 struct ClientRef {
