@@ -1,3 +1,4 @@
+pub mod call;
 pub mod client;
 pub mod error;
 
