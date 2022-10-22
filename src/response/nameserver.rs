@@ -1,52 +1,37 @@
-use crate::{Error, Result};
 use crate::call::nameserver::RecordType;
+use crate::{Error, Result};
 
 use std::collections::BTreeMap;
 use std::fmt;
 
 use iso8601::DateTime;
 
-fn get_str(
-    map: &BTreeMap<String, xmlrpc::Value>,
-    key: &'static str,
-) -> Result<String> {
-    let value = map.get(key)
+fn get_str(map: &BTreeMap<String, xmlrpc::Value>, key: &'static str) -> Result<String> {
+    let value = map
+        .get(key)
         .ok_or(Error::Inexistent(key))?
         .as_str()
-        .ok_or_else(|| Error::Type(key, "String", map.get(key)
-            .unwrap()
-            .clone()
-        ))?;
+        .ok_or_else(|| Error::Type(key, "String", map.get(key).unwrap().clone()))?;
 
     Ok(value.to_owned())
 }
 
-fn get_i32(
-    map: &BTreeMap<String, xmlrpc::Value>,
-    key: &'static str,
-) -> Result<i32> {
-    let value = map.get(key)
+fn get_i32(map: &BTreeMap<String, xmlrpc::Value>, key: &'static str) -> Result<i32> {
+    let value = map
+        .get(key)
         .ok_or(Error::Inexistent(key))?
         .as_i32()
-        .ok_or_else(|| Error::Type(key, "Int", map.get(key)
-            .unwrap()
-            .clone()
-        ))?;
+        .ok_or_else(|| Error::Type(key, "Int", map.get(key).unwrap().clone()))?;
 
     Ok(value)
 }
 
-fn get_bool(
-    map: &BTreeMap<String, xmlrpc::Value>,
-    key: &'static str,
-) -> Result<bool> {
-    let value = map.get(key)
+fn get_bool(map: &BTreeMap<String, xmlrpc::Value>, key: &'static str) -> Result<bool> {
+    let value = map
+        .get(key)
         .ok_or(Error::Inexistent(key))?
         .as_bool()
-        .ok_or_else(|| Error::Type(key, "Bool", map.get(key)
-            .unwrap()
-            .clone()
-        ))?;
+        .ok_or_else(|| Error::Type(key, "Bool", map.get(key).unwrap().clone()))?;
 
     Ok(value)
 }
