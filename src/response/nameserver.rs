@@ -166,6 +166,7 @@ impl TryFrom<xmlrpc::Value> for Record {
 }
 
 /// The records that match a search.
+#[derive(Clone, Debug)]
 pub struct RecordInfo {
     pub domain_id: i32,
     pub domain_name: String,
