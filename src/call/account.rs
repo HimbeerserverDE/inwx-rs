@@ -25,6 +25,7 @@ impl Call for Login<'_> {
     fn method_name(&self) -> &'static str {
         "account.login"
     }
+
     fn expected(&self) -> &'static [i32] {
         &[1000]
     }
