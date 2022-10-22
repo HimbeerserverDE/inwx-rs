@@ -5,3 +5,4 @@ pub trait Call: Into<xmlrpc::Value> {
 }
 
 pub mod account;
+pub mod nameserver;
