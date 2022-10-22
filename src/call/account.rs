@@ -3,6 +3,7 @@ use super::Call;
 use std::collections::BTreeMap;
 
 // Contains login information. Used to create an API session.
+#[derive(Clone, Debug)]
 pub(crate) struct Login<'a> {
     pub(crate) user: &'a str,
     pub(crate) pass: &'a str,
@@ -33,6 +34,7 @@ impl Call for Login<'_> {
 
 // Contains no information. This just signals to the server
 // that it should end the session.
+#[derive(Clone, Debug)]
 pub(crate) struct Logout;
 
 impl From<Logout> for xmlrpc::Value {

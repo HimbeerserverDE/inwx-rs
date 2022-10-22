@@ -1,5 +1,5 @@
 // A call to the API.
-pub trait Call: Into<xmlrpc::Value> {
+pub trait Call: Clone + std::fmt::Debug + Into<xmlrpc::Value> {
     fn method_name(&self) -> &'static str;
     fn expected(&self) -> &'static [i32];
 }
