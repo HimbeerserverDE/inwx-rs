@@ -181,8 +181,8 @@ impl TryFrom<Response> for RecordInfo {
         let info = Self {
             records: get_array(&resp.data, "record")?
                 .iter()
-                .filter_map(|v| v.to_owned().try_into().ok())
-                .collect(),
+                .map(|v| v.to_owned().try_into())
+                .collect::<Result<Vec<Record>>>()?,
         };
 
         Ok(info)
