@@ -10,6 +10,7 @@ pub enum Error {
     Type(&'static str, &'static str, xmlrpc::Value),
     BadResponse(xmlrpc::Value),
     BadStatus(&'static [i32], i32),
+    BadVariant(&'static str, String),
 }
 
 impl std::error::Error for Error {}
@@ -22,17 +23,20 @@ impl fmt::Display for Error {
             Error::XmlRpc(err) => write!(fmt, "xmlrpc error: {}", err),
             Error::Inexistent(what) => {
                 write!(fmt, "parameter {} does not exist", what)
-            }
+            },
             Error::Type(what, exp, got) => {
                 write!(
                     fmt,
                     "parameter {what} is of wrong type {got:?} (expected: {exp})"
                 )
-            }
+            },
             Error::BadResponse(resp) => write!(fmt, "bad response: {:?}", resp),
             Error::BadStatus(expected, got) => {
                 write!(fmt, "bad status {} (expected: {:?}", got, expected)
-            }
+            },
+            Error::BadVariant(ename, var) => {
+                write!(fmt, "{} is not a valid enum variant for {}", var, ename)
+            },
         }
     }
 }

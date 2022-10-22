@@ -1,3 +1,4 @@
+use crate::{Error, Result};
 use super::Call;
 
 use std::collections::BTreeMap;
@@ -66,6 +67,38 @@ impl fmt::Display for RecordType {
 impl From<RecordType> for xmlrpc::Value {
     fn from(rt: RecordType) -> Self {
         xmlrpc::Value::String(rt.to_string())
+    }
+}
+
+impl TryFrom<String> for RecordType {
+    type Error = Error;
+    fn try_from(s: String) -> Result<Self> {
+        match s.as_str() {
+            "A" => Ok(Self::A),
+            "AAAA" => Ok(Self::Aaaa),
+            "AFSDB" => Ok(Self::Afsdb),
+            "ALIAS" => Ok(Self::Alias),
+            "CAA" => Ok(Self::Caa),
+            "CERT" => Ok(Self::Cert),
+            "CNAME" => Ok(Self::Cname),
+            "HINFO" => Ok(Self::Hinfo),
+            "KEY" => Ok(Self::Key),
+            "LOC" => Ok(Self::Loc),
+            "MX" => Ok(Self::Mx),
+            "NAPTR" => Ok(Self::NaPtr),
+            "NS" => Ok(Self::Ns),
+            "OPENPGPKEY" => Ok(Self::OpenPgpKey),
+            "PTR" => Ok(Self::Ptr),
+            "RP" => Ok(Self::Rp),
+            "SMIMEA" => Ok(Self::SmimeA),
+            "SOA" => Ok(Self::Soa),
+            "SSHFP" => Ok(Self::Sshfp),
+            "TLSA" => Ok(Self::Tlsa),
+            "TXT" => Ok(Self::Txt),
+            "URI" => Ok(Self::Uri),
+            "URL" => Ok(Self::Url),
+            _ => Err(Error::BadVariant("RecordType", s)),
+        }
     }
 }
 

@@ -7,3 +7,5 @@ pub struct Response {
     pub status: i32,
     pub data: BTreeMap<String, xmlrpc::Value>,
 }
+
+pub mod nameserver;
