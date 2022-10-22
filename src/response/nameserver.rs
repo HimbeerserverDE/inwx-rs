@@ -151,6 +151,12 @@ impl TryFrom<String> for UrlRdrType {
     }
 }
 
+impl From<UrlRdrType> for xmlrpc::Value {
+    fn from(url_rdr_type: UrlRdrType) -> Self {
+        url_rdr_type.to_string().into()
+    }
+}
+
 /// A nameserver record. Contains DNS information as well as INWX metadata.
 #[derive(Clone, Debug)]
 pub struct Record {
