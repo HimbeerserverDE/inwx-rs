@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 
 /// The DNS record type.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum RecordType {
     A,
     Aaaa,
@@ -104,20 +104,20 @@ impl TryFrom<String> for RecordType {
 
 /// Search parameters to find nameserver records
 /// the account has access to.
-#[derive(Clone, Copy, Debug)]
-pub struct RecordInfo<'a> {
-    pub domain_name: &'a str,
+#[derive(Clone, Debug)]
+pub struct RecordInfo {
+    pub domain_name: String,
     pub domain_id: i32,
     pub record_id: i32,
     pub record_type: RecordType,
-    pub name: &'a str,
-    pub content: &'a str,
+    pub name: String,
+    pub content: String,
     pub ttl: i32,
     pub priority: i32,
 }
 
-impl From<RecordInfo<'_>> for xmlrpc::Value {
-    fn from(info: RecordInfo<'_>) -> Self {
+impl From<RecordInfo> for xmlrpc::Value {
+    fn from(info: RecordInfo) -> Self {
         let mut map = BTreeMap::new();
 
         map.insert("domain".into(), info.domain_name.into());
@@ -132,7 +132,7 @@ impl From<RecordInfo<'_>> for xmlrpc::Value {
     }
 }
 
-impl Call for RecordInfo<'_> {
+impl Call for RecordInfo {
     fn method_name(&self) -> &'static str {
         "nameserver.info"
     }
