@@ -102,31 +102,51 @@ impl TryFrom<String> for RecordType {
     }
 }
 
-/// Search parameters to find nameserver records
+/// Optional search constraints to find nameserver records
 /// the account has access to.
 #[derive(Clone, Debug)]
 pub struct RecordInfo {
-    pub domain_name: String,
-    pub domain_id: i32,
-    pub record_id: i32,
-    pub record_type: RecordType,
-    pub name: String,
-    pub content: String,
-    pub ttl: i32,
-    pub priority: i32,
+    pub domain_name: Option<String>,
+    pub domain_id: Option<i32>,
+    pub record_id: Option<i32>,
+    pub record_type: Option<RecordType>,
+    pub name: Option<String>,
+    pub content: Option<String>,
+    pub ttl: Option<i32>,
+    pub priority: Option<i32>,
 }
 
 impl From<RecordInfo> for xmlrpc::Value {
     fn from(info: RecordInfo) -> Self {
         let mut map = BTreeMap::new();
 
-        map.insert("domain".into(), info.domain_name.into());
-        map.insert("roId".into(), info.domain_id.into());
-        map.insert("recordId".into(), info.record_id.into());
-        map.insert("type".into(), info.record_type.into());
-        map.insert("content".into(), info.content.into());
-        map.insert("ttl".into(), info.ttl.into());
-        map.insert("prio".into(), info.priority.into());
+        if let Some(domain_name) = info.domain_name {
+            map.insert("domain".into(), domain_name.into());
+        }
+
+        if let Some(domain_id) = info.domain_id {
+            map.insert("roId".into(), domain_id.into());
+        }
+
+        if let Some(record_id) = info.record_id {
+            map.insert("recordId".into(), record_id.into());
+        }
+
+        if let Some(record_type) = info.record_type {
+            map.insert("type".into(), record_type.into());
+        }
+
+        if let Some(content) = info.content {
+            map.insert("content".into(), content.into());
+        }
+
+        if let Some(ttl) = info.ttl {
+            map.insert("ttl".into(), ttl.into());
+        }
+
+        if let Some(priority) = info.priority {
+            map.insert("prio".into(), priority.into());
+        }
 
         xmlrpc::Value::Struct(map)
     }
