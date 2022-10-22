@@ -5,6 +5,8 @@ use crate::{Error, Result};
 use std::collections::BTreeMap;
 use std::fmt;
 
+use iso8601::DateTime;
+
 fn get_str(map: &BTreeMap<String, xmlrpc::Value>, key: &'static str) -> Result<String> {
     let value = map
         .get(key)
@@ -35,6 +37,16 @@ fn get_bool(map: &BTreeMap<String, xmlrpc::Value>, key: &'static str) -> Result<
     Ok(value)
 }
 
+fn get_datetime(map: &BTreeMap<String, xmlrpc::Value>, key: &'static str) -> Result<DateTime> {
+    let value = map
+        .get(key)
+        .ok_or(Error::Inexistent(key))?
+        .as_datetime()
+        .ok_or_else(|| Error::Type(key, "DateTime", map.get(key).unwrap().clone()))?;
+
+    Ok(value)
+}
+
 fn get_array(
     map: &BTreeMap<String, xmlrpc::Value>,
     key: &'static str,
@@ -46,6 +58,19 @@ fn get_array(
         .ok_or_else(|| Error::Type(key, "Array", map.get(key).unwrap().clone()))?;
 
     Ok(value.to_vec())
+}
+
+fn get_map(
+    map: &BTreeMap<String, xmlrpc::Value>,
+    key: &'static str,
+) -> Result<BTreeMap<String, xmlrpc::Value>> {
+    let value = map
+        .get(key)
+        .ok_or(Error::Inexistent(key))?
+        .as_struct()
+        .ok_or_else(|| Error::Type(key, "Struct", map.get(key).unwrap().clone()))?;
+
+    Ok(value.to_owned())
 }
 
 /// The domain type. Can be master or slave.
@@ -172,6 +197,13 @@ impl TryFrom<xmlrpc::Value> for Record {
 /// The records that match a search.
 #[derive(Clone, Debug)]
 pub struct RecordInfo {
+    pub domain_id: i32,
+    pub domain_name: String,
+    pub domain_type: DomainType,
+    pub master_address: String,
+    pub last_zone_check: DateTime,
+    pub slave_dns: SlaveDns,
+    pub soa_serial: String,
     pub records: Vec<Record>,
 }
 
@@ -179,6 +211,13 @@ impl TryFrom<Response> for RecordInfo {
     type Error = Error;
     fn try_from(resp: Response) -> Result<Self> {
         let info = Self {
+            domain_id: get_i32(&resp.data, "roId")?,
+            domain_name: get_str(&resp.data, "domain")?,
+            domain_type: get_str(&resp.data, "type")?.try_into()?,
+            master_address: get_str(&resp.data, "masterIp")?,
+            last_zone_check: get_datetime(&resp.data, "lastZoneCheck")?,
+            slave_dns: get_map(&resp.data, "slaveDns")?.try_into()?,
+            soa_serial: get_str(&resp.data, "SOAserial")?,
             records: get_array(&resp.data, "record")?
                 .iter()
                 .map(|v| v.to_owned().try_into())
