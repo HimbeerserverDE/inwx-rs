@@ -1,3 +1,4 @@
+use super::Response;
 use crate::call::nameserver::RecordType;
 use crate::{Error, Result};
 
@@ -36,6 +37,42 @@ fn get_bool(map: &BTreeMap<String, xmlrpc::Value>, key: &'static str) -> Result<
     Ok(value)
 }
 
+fn get_datetime(map: &BTreeMap<String, xmlrpc::Value>, key: &'static str) -> Result<DateTime> {
+    let value = map
+        .get(key)
+        .ok_or(Error::Inexistent(key))?
+        .as_datetime()
+        .ok_or_else(|| Error::Type(key, "DateTime", map.get(key).unwrap().clone()))?;
+
+    Ok(value)
+}
+
+fn get_array(
+    map: &BTreeMap<String, xmlrpc::Value>,
+    key: &'static str,
+) -> Result<Vec<xmlrpc::Value>> {
+    let value = map
+        .get(key)
+        .ok_or(Error::Inexistent(key))?
+        .as_array()
+        .ok_or_else(|| Error::Type(key, "Array", map.get(key).unwrap().clone()))?;
+
+    Ok(value.to_vec())
+}
+
+fn get_map(
+    map: &BTreeMap<String, xmlrpc::Value>,
+    key: &'static str,
+) -> Result<BTreeMap<String, xmlrpc::Value>> {
+    let value = map
+        .get(key)
+        .ok_or(Error::Inexistent(key))?
+        .as_struct()
+        .ok_or_else(|| Error::Type(key, "Struct", map.get(key).unwrap().clone()))?;
+
+    Ok(value.to_owned())
+}
+
 /// The domain type. Can be master or slave.
 #[derive(Clone, Debug)]
 pub enum DomainType {
@@ -52,17 +89,13 @@ impl fmt::Display for DomainType {
     }
 }
 
-impl TryFrom<xmlrpc::Value> for DomainType {
+impl TryFrom<String> for DomainType {
     type Error = Error;
-    fn try_from(v: xmlrpc::Value) -> Result<Self> {
-        if let xmlrpc::Value::String(s) = v {
-            match s.as_str() {
-                "MASTER" => Ok(Self::Master),
-                "SLAVE" => Ok(Self::Slave),
-                _ => Err(Error::BadVariant("DomainType", s)),
-            }
-        } else {
-            Err(Error::Type("type", "String", v))
+    fn try_from(s: String) -> Result<Self> {
+        match s.as_str() {
+            "MASTER" => Ok(Self::Master),
+            "SLAVE" => Ok(Self::Slave),
+            _ => Err(Error::BadVariant("DomainType", s)),
         }
     }
 }
@@ -74,19 +107,15 @@ pub struct SlaveDns {
     pub address: String,
 }
 
-impl TryFrom<xmlrpc::Value> for SlaveDns {
+impl TryFrom<BTreeMap<String, xmlrpc::Value>> for SlaveDns {
     type Error = Error;
-    fn try_from(v: xmlrpc::Value) -> Result<Self> {
-        if let xmlrpc::Value::Struct(map) = v {
-            let slave = Self {
-                hostname: get_str(&map, "name")?,
-                address: get_str(&map, "ip")?,
-            };
+    fn try_from(map: BTreeMap<String, xmlrpc::Value>) -> Result<Self> {
+        let slave = Self {
+            hostname: get_str(&map, "name")?,
+            address: get_str(&map, "ip")?,
+        };
 
-            Ok(slave)
-        } else {
-            Err(Error::Type("slaveDns", "Struct", v))
-        }
+        Ok(slave)
     }
 }
 
@@ -176,4 +205,25 @@ pub struct RecordInfo {
     pub slave_dns: SlaveDns,
     pub soa_serial: String,
     pub records: Vec<Record>,
+}
+
+impl TryFrom<Response> for RecordInfo {
+    type Error = Error;
+    fn try_from(resp: Response) -> Result<Self> {
+        let info = Self {
+            domain_id: get_i32(&resp.data, "roId")?,
+            domain_name: get_str(&resp.data, "domain")?,
+            domain_type: get_str(&resp.data, "type")?.try_into()?,
+            master_address: get_str(&resp.data, "masterIp")?,
+            last_zone_check: get_datetime(&resp.data, "lastZoneCheck")?,
+            slave_dns: get_map(&resp.data, "slaveDns")?.try_into()?,
+            soa_serial: get_str(&resp.data, "SOAserial")?,
+            records: get_array(&resp.data, "record")?
+                .iter()
+                .filter_map(|v| v.to_owned().try_into().ok())
+                .collect(),
+        };
+
+        Ok(info)
+    }
 }
