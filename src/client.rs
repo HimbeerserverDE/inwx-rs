@@ -14,18 +14,18 @@ pub enum Endpoint {
     Sandbox,
 }
 
-impl From<Endpoint> for &str {
-    fn from(endpoint: Endpoint) -> &'static str {
+impl From<Endpoint> for String {
+    fn from(endpoint: Endpoint) -> String {
         match endpoint {
-            Endpoint::Production => "https://api.domrobot.com/xmlrpc/",
-            Endpoint::Sandbox => "https://api.ote.domrobot.com/xmlrpc/",
+            Endpoint::Production => String::from("https://api.domrobot.com/xmlrpc/"),
+            Endpoint::Sandbox => String::from("https://api.ote.domrobot.com/xmlrpc/"),
         }
     }
 }
 
 impl From<Endpoint> for Url {
     fn from(endpoint: Endpoint) -> Self {
-        Url::parse(endpoint.into()).unwrap()
+        String::from(endpoint).parse().unwrap()
     }
 }
 
