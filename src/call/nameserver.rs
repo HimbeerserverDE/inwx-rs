@@ -54,12 +54,12 @@ impl From<RecordInfo> for xmlrpc::Value {
 }
 
 impl Call for RecordInfo {
-    fn method_name(&self) -> &'static str {
-        "nameserver.info"
+    fn method_name(&self) -> String {
+        String::from("nameserver.info")
     }
 
-    fn expected(&self) -> &'static [i32] {
-        &[1000]
+    fn expected(&self) -> Vec<i32> {
+        vec![1000]
     }
 }
 
@@ -142,11 +142,11 @@ impl From<RecordUpdate> for xmlrpc::Value {
 }
 
 impl Call for RecordUpdate {
-    fn method_name(&self) -> &'static str {
-        "nameserver.updateRecord"
+    fn method_name(&self) -> String {
+        String::from("nameserver.updateRecord")
     }
 
-    fn expected(&self) -> &'static [i32] {
-        &[1000]
+    fn expected(&self) -> Vec<i32> {
+        vec![1000]
     }
 }

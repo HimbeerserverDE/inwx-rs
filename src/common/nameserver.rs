@@ -97,7 +97,7 @@ impl TryFrom<String> for RecordType {
             "TXT" => Ok(Self::Txt),
             "URI" => Ok(Self::Uri),
             "URL" => Ok(Self::Url),
-            _ => Err(Error::BadVariant("RecordType", s)),
+            _ => Err(Error::BadVariant("RecordType".into(), s)),
         }
     }
 }
@@ -124,7 +124,7 @@ impl TryFrom<String> for DomainType {
         match s.as_str() {
             "MASTER" => Ok(Self::Master),
             "SLAVE" => Ok(Self::Slave),
-            _ => Err(Error::BadVariant("DomainType", s)),
+            _ => Err(Error::BadVariant("DomainType".into(), s)),
         }
     }
 }
@@ -140,8 +140,8 @@ impl TryFrom<BTreeMap<String, xmlrpc::Value>> for SlaveDns {
     type Error = Error;
     fn try_from(map: BTreeMap<String, xmlrpc::Value>) -> Result<Self> {
         Ok(Self {
-            hostname: get_str(&map, "name")?,
-            address: get_str(&map, "ip")?,
+            hostname: get_str(&map, "name".into())?,
+            address: get_str(&map, "ip".into())?,
         })
     }
 }
@@ -171,7 +171,7 @@ impl TryFrom<String> for UrlRdrType {
             "HEADER301" => Ok(Self::Permanent),
             "HEADER302" => Ok(Self::Temporary),
             "FRAME" => Ok(Self::Frame),
-            _ => Err(Error::BadVariant("UrlRdrType", s)),
+            _ => Err(Error::BadVariant("UrlRdrType".into(), s)),
         }
     }
 }

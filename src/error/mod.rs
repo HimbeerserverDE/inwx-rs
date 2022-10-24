@@ -6,11 +6,11 @@ pub enum Error {
     ParseUrl(url::ParseError),
     Reqwest(reqwest::Error),
     XmlRpc(xmlrpc::Error),
-    Inexistent(&'static str),
-    Type(&'static str, &'static str, xmlrpc::Value),
+    Inexistent(String),
+    Type(String, String, xmlrpc::Value),
     BadResponse(xmlrpc::Value),
-    BadStatus(&'static [i32], i32),
-    BadVariant(&'static str, String),
+    BadStatus(Vec<i32>, i32),
+    BadVariant(String, String),
 }
 
 impl std::error::Error for Error {}

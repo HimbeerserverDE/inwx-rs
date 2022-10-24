@@ -23,12 +23,12 @@ impl From<Login<'_>> for xmlrpc::Value {
 }
 
 impl Call for Login<'_> {
-    fn method_name(&self) -> &'static str {
-        "account.login"
+    fn method_name(&self) -> String {
+        String::from("account.login")
     }
 
-    fn expected(&self) -> &'static [i32] {
-        &[1000]
+    fn expected(&self) -> Vec<i32> {
+        vec![1000]
     }
 }
 
@@ -44,10 +44,10 @@ impl From<Logout> for xmlrpc::Value {
 }
 
 impl Call for Logout {
-    fn method_name(&self) -> &'static str {
-        "account.logout"
+    fn method_name(&self) -> String {
+        String::from("account.logout")
     }
-    fn expected(&self) -> &'static [i32] {
-        &[1500]
+    fn expected(&self) -> Vec<i32> {
+        vec![1500]
     }
 }

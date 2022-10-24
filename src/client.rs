@@ -64,12 +64,13 @@ impl Client {
 
         let transport = self.inner.http.post::<Url>(self.inner.endpoint.into());
 
-        let request = xmlrpc::Request::new(call.method_name()).arg(call);
+        let binding = call.method_name();
+        let request = xmlrpc::Request::new(&binding).arg(call);
 
         let raw = request.call(transport)?;
         match raw {
             xmlrpc::Value::Struct(map) => {
-                let code = map.get("code").ok_or(Error::Inexistent("code"))?;
+                let code = map.get("code").ok_or(Error::Inexistent("code".into()))?;
 
                 match code {
                     xmlrpc::Value::Int(code) => {
@@ -82,13 +83,17 @@ impl Client {
                                     status: *code,
                                     data: response.clone(),
                                 }),
-                                _ => Err(Error::Type("resData", "Struct", data.clone())),
+                                _ => Err(Error::Type(
+                                    "resData".into(),
+                                    "Struct".into(),
+                                    data.clone(),
+                                )),
                             }
                         } else {
                             Err(Error::BadStatus(expected, *code))
                         }
                     }
-                    _ => Err(Error::Type("code", "Int", code.clone())),
+                    _ => Err(Error::Type("code".into(), "Int".into(), code.clone())),
                 }
             }
             _ => Err(Error::BadResponse(raw.clone())),
