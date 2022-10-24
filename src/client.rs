@@ -70,7 +70,9 @@ impl Client {
         let raw = request.call(transport)?;
         match raw {
             xmlrpc::Value::Struct(map) => {
-                let code = map.get("code").ok_or(Error::Inexistent("code".into()))?;
+                let code = map
+                    .get("code")
+                    .ok_or_else(|| Error::Inexistent("code".into()))?;
 
                 match code {
                     xmlrpc::Value::Int(code) => {
