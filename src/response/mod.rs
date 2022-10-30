@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 #[derive(Clone, Debug)]
 pub struct Response {
     pub status: i32,
-    pub data: BTreeMap<String, xmlrpc::Value>,
+    pub(crate) data: BTreeMap<String, xmlrpc::Value>,
 }
 
 pub mod nameserver;
