@@ -4,14 +4,14 @@ use std::collections::BTreeMap;
 
 // Contains login information. Used to create an API session.
 #[derive(Clone, Debug)]
-pub(crate) struct Login<'a> {
-    pub(crate) user: &'a str,
-    pub(crate) pass: &'a str,
+pub(crate) struct Login {
+    pub(crate) user: String,
+    pub(crate) pass: String,
     pub(crate) case_insensitive: bool,
 }
 
-impl From<Login<'_>> for xmlrpc::Value {
-    fn from(login: Login<'_>) -> Self {
+impl From<Login> for xmlrpc::Value {
+    fn from(login: Login) -> Self {
         let mut map = BTreeMap::new();
 
         map.insert("user".into(), login.user.into());
@@ -22,7 +22,7 @@ impl From<Login<'_>> for xmlrpc::Value {
     }
 }
 
-impl Call for Login<'_> {
+impl Call for Login {
     fn method_name(&self) -> String {
         String::from("account.login")
     }

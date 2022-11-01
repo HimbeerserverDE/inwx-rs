@@ -39,7 +39,7 @@ pub struct Client {
 
 impl Client {
     /// Initialises a session and returns a `Client` if successful.
-    pub fn login(ep: Endpoint, user: &str, pass: &str) -> Result<Client> {
+    pub fn login(ep: Endpoint, user: String, pass: String) -> Result<Client> {
         let client = Client {
             inner: Arc::new(ClientRef {
                 http: blocking::Client::builder().cookie_store(true).build()?,
