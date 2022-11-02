@@ -18,9 +18,9 @@ impl std::error::Error for Error {}
 impl fmt::Display for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::ParseUrl(err) => write!(fmt, "can't parse Url: {}", err),
-            Error::Reqwest(err) => write!(fmt, "reqwest error: {}", err),
-            Error::XmlRpc(err) => write!(fmt, "xmlrpc error: {}", err),
+            Error::ParseUrl(e) => write!(fmt, "can't parse Url: {}", e),
+            Error::Reqwest(e) => write!(fmt, "reqwest eor: {}", e),
+            Error::XmlRpc(e) => write!(fmt, "xmlrpc eor: {}", e),
             Error::Inexistent(what) => {
                 write!(fmt, "parameter {} does not exist", what)
             }
@@ -34,28 +34,28 @@ impl fmt::Display for Error {
             Error::BadStatus(expected, got) => {
                 write!(fmt, "bad status {} (expected: {:?}", got, expected)
             }
-            Error::BadVariant(ename, var) => {
-                write!(fmt, "{} is not a valid enum variant for {}", var, ename)
+            Error::BadVariant(enum_name, var) => {
+                write!(fmt, "{} is not a valid enum variant for {}", var, enum_name)
             }
         }
     }
 }
 
 impl From<url::ParseError> for Error {
-    fn from(err: url::ParseError) -> Self {
-        Self::ParseUrl(err)
+    fn from(e: url::ParseError) -> Self {
+        Self::ParseUrl(e)
     }
 }
 
 impl From<reqwest::Error> for Error {
-    fn from(err: reqwest::Error) -> Self {
-        Self::Reqwest(err)
+    fn from(e: reqwest::Error) -> Self {
+        Self::Reqwest(e)
     }
 }
 
 impl From<xmlrpc::Error> for Error {
-    fn from(err: xmlrpc::Error) -> Self {
-        Self::XmlRpc(err)
+    fn from(e: xmlrpc::Error) -> Self {
+        Self::XmlRpc(e)
     }
 }
 
