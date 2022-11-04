@@ -66,7 +66,10 @@ impl Client {
         let expected = call.expected();
         let xml = serde_xmlrpc::request_to_str(&call.method_name(), vec![call])?;
 
-        let raw_response = self.inner.http.post::<Url>(self.inner.endpoint.into())
+        let raw_response = self
+            .inner
+            .http
+            .post::<Url>(self.inner.endpoint.into())
             .body(xml)
             .send()?
             .text()?;
@@ -90,7 +93,7 @@ impl Client {
         let data = resp
             .get("resData")
             .ok_or_else(|| Error::MalformedResponse(map.clone()))?;
-        
+
         let res_data = serde_xmlrpc::value_to_string(data.clone())?;
 
         Ok(serde_xmlrpc::response_from_str(&res_data)?)
