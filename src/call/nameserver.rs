@@ -1,5 +1,5 @@
-use crate::response::nameserver::RecordInfo as RecordInfoResponse;
 use super::*;
+use crate::response::nameserver::RecordInfo as RecordInfoResponse;
 
 use serde_derive::{Deserialize, Serialize};
 
