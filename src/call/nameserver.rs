@@ -1,4 +1,5 @@
-use super::Call;
+use crate::response::nameserver::RecordInfo as RecordInfoResponse;
+use super::*;
 
 use serde_derive::{Deserialize, Serialize};
 
@@ -20,6 +21,18 @@ pub struct RecordInfo {
     #[serde(rename = "prio")]
     pub priority: Option<i32>,
 }
+
+impl Call for RecordInfo {
+    fn method_name(&self) -> String {
+        String::from("nameserver.info")
+    }
+
+    fn expected(&self) -> Vec<i32> {
+        vec![1000]
+    }
+}
+
+impl Response<RecordInfoResponse> for RecordInfo {}
 
 /// Update the records with the specified IDs.
 /// Any `None` variants will remain unchanged.
@@ -59,3 +72,5 @@ impl Call for RecordUpdate {
         vec![1000]
     }
 }
+
+impl Response<()> for RecordUpdate {}
