@@ -5,12 +5,10 @@ use std::fmt;
 pub enum Error {
     ParseUrl(url::ParseError),
     Reqwest(reqwest::Error),
-    XmlRpc(xmlrpc::Error),
+    SerdeXmlRpc(serde_xmlrpc::Error),
     Inexistent(String),
-    Type(String, String, xmlrpc::Value),
-    BadResponse(xmlrpc::Value),
+    MalformedResponse(serde_xmlrpc::Value),
     BadStatus(Vec<i32>, i32),
-    BadVariant(String, String),
 }
 
 impl std::error::Error for Error {}
@@ -19,23 +17,16 @@ impl fmt::Display for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::ParseUrl(e) => write!(fmt, "can't parse Url: {}", e),
-            Error::Reqwest(e) => write!(fmt, "reqwest eor: {}", e),
-            Error::XmlRpc(e) => write!(fmt, "xmlrpc eor: {}", e),
+            Error::Reqwest(e) => write!(fmt, "reqwest error: {}", e),
+            Error::SerdeXmlRpc(e) => write!(fmt, "serde_xmlrpc error: {}", e),
             Error::Inexistent(what) => {
                 write!(fmt, "parameter {} does not exist", what)
             }
-            Error::Type(what, exp, got) => {
-                write!(
-                    fmt,
-                    "parameter {what} is of wrong type {got:?} (expected: {exp})"
-                )
+            Error::MalformedResponse(resp) => {
+                write!(fmt, "malformed response: {:?}", resp)
             }
-            Error::BadResponse(resp) => write!(fmt, "bad response: {:?}", resp),
             Error::BadStatus(expected, got) => {
                 write!(fmt, "bad status {} (expected: {:?}", got, expected)
-            }
-            Error::BadVariant(enum_name, var) => {
-                write!(fmt, "{} is not a valid enum variant for {}", var, enum_name)
             }
         }
     }
@@ -53,9 +44,9 @@ impl From<reqwest::Error> for Error {
     }
 }
 
-impl From<xmlrpc::Error> for Error {
-    fn from(e: xmlrpc::Error) -> Self {
-        Self::XmlRpc(e)
+impl From<serde_xmlrpc::Error> for Error {
+    fn from(e: serde_xmlrpc::Error) -> Self {
+        Self::SerdeXmlRpc(e)
     }
 }
 

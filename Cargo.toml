@@ -6,15 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-iso8601 = "0.4.0"
+iso8601 = "0.3.0"
 url = "2.2.2"
+serde = "1.0.147"
+serde_derive = "1.0.147"
 
 [dependencies.reqwest]
 version = "0.11"
 default-features = false
 features = ["blocking", "cookies", "rustls-tls"]
 
-[dependencies.xmlrpc]
-version = "0.15.1"
-default-features = false
-features = ["http"]
+[dependencies.serde_xmlrpc]
+version = "0.1.1"
+git = "https://github.com/HimbeerserverDE/serde_xml_rpc.git"
+branch = "serializer"

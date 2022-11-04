@@ -1,25 +1,14 @@
-use super::Call;
+use super::*;
 
-use std::collections::BTreeMap;
+use serde_derive::{Deserialize, Serialize};
 
 // Contains login information. Used to create an API session.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub(crate) struct Login {
     pub(crate) user: String,
     pub(crate) pass: String,
+    #[serde(rename = "case-insensitive")]
     pub(crate) case_insensitive: bool,
-}
-
-impl From<Login> for xmlrpc::Value {
-    fn from(login: Login) -> Self {
-        let mut map = BTreeMap::new();
-
-        map.insert("user".into(), login.user.into());
-        map.insert("pass".into(), login.pass.into());
-        map.insert("case-insensitive".into(), login.case_insensitive.into());
-
-        xmlrpc::Value::Struct(map)
-    }
 }
 
 impl Call for Login {
@@ -32,16 +21,12 @@ impl Call for Login {
     }
 }
 
+impl Response<()> for Login {}
+
 // Contains no information. This just signals to the server
 // that it should end the session.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub(crate) struct Logout;
-
-impl From<Logout> for xmlrpc::Value {
-    fn from(_logout: Logout) -> Self {
-        xmlrpc::Value::Nil
-    }
-}
 
 impl Call for Logout {
     fn method_name(&self) -> String {
@@ -51,3 +36,5 @@ impl Call for Logout {
         vec![1500]
     }
 }
+
+impl Response<()> for Logout {}
