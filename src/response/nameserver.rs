@@ -1,3 +1,4 @@
+use super::Response;
 use crate::common::nameserver::SlaveDns;
 
 use serde_derive::{Deserialize, Serialize};
@@ -48,4 +49,10 @@ pub struct RecordInfo {
     pub soa_serial: Option<String>,
     #[serde(rename = "record")]
     pub records: Option<Vec<Record>>,
+}
+
+impl Response for RecordInfo {
+    fn unwrap(wrapped: Option<Self>) -> Self {
+        wrapped.unwrap()
+    }
 }

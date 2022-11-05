@@ -7,7 +7,7 @@ pub enum Error {
     Reqwest(reqwest::Error),
     SerdeXmlRpc(serde_xmlrpc::Error),
     Inexistent(String),
-    MalformedResponse(serde_xmlrpc::Value),
+    MalformedResponse(String),
     BadStatus(Vec<i32>, i32),
 }
 

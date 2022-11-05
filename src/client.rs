@@ -1,4 +1,5 @@
-use crate::call::{self, Response};
+use crate::call;
+use crate::response::{self, ResponseData};
 use crate::{Error, Result};
 
 use std::sync::Arc;
@@ -60,11 +61,13 @@ impl Client {
     /// matches one of the expected status codes.
     pub fn call<T, U>(&self, call: T) -> Result<U>
     where
-        T: call::Call + Response<U>,
-        U: serde::de::DeserializeOwned,
+        T: call::Call + call::Response<U>,
+        U: response::Response + Clone + serde::de::DeserializeOwned,
     {
         let expected = call.expected();
         let xml = serde_xmlrpc::request_to_str(&call.method_name(), vec![call])?;
+        println!("{}", xml);
+        println!("----- SEPERATOR -----");
 
         let raw_response = self
             .inner
@@ -74,29 +77,14 @@ impl Client {
             .send()?
             .text()?;
 
-        let map = serde_xmlrpc::value_from_str(&raw_response)?;
+        println!("{}", raw_response);
+        let resp: ResponseData<U> = serde_xmlrpc::response_from_str(&raw_response)?;
 
-        let resp = map
-            .as_struct()
-            .ok_or_else(|| Error::MalformedResponse(map.clone()))?;
-
-        let code = resp
-            .get("code")
-            .ok_or_else(|| Error::MalformedResponse(map.clone()))?
-            .as_i32()
-            .ok_or_else(|| Error::MalformedResponse(map.clone()))?;
-
-        if !expected.contains(&code) {
-            return Err(Error::BadStatus(expected, code));
+        if !expected.contains(&resp.status) {
+            return Err(Error::BadStatus(expected, resp.status));
         }
 
-        let data = resp
-            .get("resData")
-            .ok_or_else(|| Error::MalformedResponse(map.clone()))?;
-
-        let res_data = serde_xmlrpc::value_to_string(data.clone())?;
-
-        Ok(serde_xmlrpc::response_from_str(&res_data)?)
+        Ok(U::unwrap(resp.params))
     }
 }
 

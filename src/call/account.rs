@@ -21,7 +21,7 @@ impl Call for Login {
     }
 }
 
-impl Response<()> for Login {}
+impl Response<crate::response::account::Login> for Login {}
 
 // Contains no information. This just signals to the server
 // that it should end the session.
@@ -32,6 +32,7 @@ impl Call for Logout {
     fn method_name(&self) -> String {
         String::from("account.logout")
     }
+
     fn expected(&self) -> Vec<i32> {
         vec![1500]
     }
