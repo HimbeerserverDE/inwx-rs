@@ -66,8 +66,6 @@ impl Client {
     {
         let expected = call.expected();
         let xml = serde_xmlrpc::request_to_str(&call.method_name(), vec![call])?;
-        println!("{}", xml);
-        println!("----- SEPERATOR -----");
 
         let raw_response = self
             .inner
@@ -77,7 +75,6 @@ impl Client {
             .send()?
             .text()?;
 
-        println!("{}", raw_response);
         let resp: ResponseData<U> = serde_xmlrpc::response_from_str(&raw_response)?;
 
         if !expected.contains(&resp.status) {
