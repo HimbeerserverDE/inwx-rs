@@ -26,7 +26,7 @@ impl fmt::Display for Error {
                 write!(fmt, "malformed response: {:?}", resp)
             }
             Error::BadStatus(expected, got) => {
-                write!(fmt, "bad status {} (expected: {:?}", got, expected)
+                write!(fmt, "bad status {} (expected: {:?})", got, expected)
             }
         }
     }
