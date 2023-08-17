@@ -2,6 +2,7 @@ use crate::call;
 use crate::response::{self, ResponseData};
 use crate::{Error, Result};
 
+use std::net::Ipv4Addr;
 use std::sync::Arc;
 
 use reqwest::{blocking, Url};
@@ -42,7 +43,17 @@ impl Client {
     pub fn login(ep: Endpoint, user: String, pass: String) -> Result<Client> {
         let client = Client {
             inner: Arc::new(ClientRef {
-                http: blocking::Client::builder().cookie_store(true).build()?,
+                http: blocking::Client::builder()
+                    .cookie_store(true)
+                    .resolve(
+                        "api.domrobot.com",
+                        (Ipv4Addr::new(185, 181, 104, 71), 443).into(),
+                    )
+                    .resolve(
+                        "api.ote.domrobot.com",
+                        (Ipv4Addr::new(185, 181, 104, 52), 443).into(),
+                    )
+                    .build()?,
                 endpoint: ep,
             }),
         };
