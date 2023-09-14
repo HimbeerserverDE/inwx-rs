@@ -47,7 +47,7 @@ impl Client {
                     .cookie_store(true)
                     .resolve(
                         "api.domrobot.com",
-                        (Ipv4Addr::new(185, 181, 104, 71), 443).into(),
+                        (Ipv4Addr::new(185, 181, 104, 26), 443).into(),
                     )
                     .resolve(
                         "api.ote.domrobot.com",
