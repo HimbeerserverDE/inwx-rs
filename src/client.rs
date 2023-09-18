@@ -15,6 +15,15 @@ pub enum Endpoint {
     Sandbox,
 }
 
+impl From<Endpoint> for &str {
+    fn from(endpoint: Endpoint) -> &'static str {
+        match endpoint {
+            Endpoint::Production => "https://api.domrobot.com/xmlrpc/",
+            Endpoint::Sandbox => "https://api.ote.domrobot.com/xmlrpc/",
+        }
+    }
+}
+
 impl From<Endpoint> for String {
     fn from(endpoint: Endpoint) -> String {
         match endpoint {
