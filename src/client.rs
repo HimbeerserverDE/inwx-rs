@@ -2,7 +2,7 @@ use crate::call;
 use crate::response::{self, ResponseData};
 use crate::{Error, Result};
 
-use std::net::Ipv4Addr;
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use reqwest::{blocking, Url};
@@ -13,6 +13,15 @@ use reqwest::{blocking, Url};
 pub enum Endpoint {
     Production,
     Sandbox,
+}
+
+impl Endpoint {
+    pub fn domain(&self) -> &'static str {
+        match self {
+            Self::Production => "api.domrobot.com",
+            Self::Sandbox => "api.ote.domrobot.com",
+        }
+    }
 }
 
 impl From<Endpoint> for &str {
@@ -52,16 +61,34 @@ impl Client {
     pub fn login(ep: Endpoint, user: String, pass: String) -> Result<Client> {
         let client = Client {
             inner: Arc::new(ClientRef {
+                http: blocking::Client::builder().cookie_store(true).build()?,
+                endpoint: ep,
+            }),
+        };
+
+        client.call(call::account::Login {
+            user,
+            pass,
+            case_insensitive: false,
+        })?;
+
+        Ok(client)
+    }
+
+    /// Initialises a session using the provided `SocketAddr`
+    /// and returns a `Client` if successful.
+    /// This is useful if your system can't resolve DNS hostnames.
+    pub fn login_addr(
+        ep: Endpoint,
+        addr: SocketAddr,
+        user: String,
+        pass: String,
+    ) -> Result<Client> {
+        let client = Client {
+            inner: Arc::new(ClientRef {
                 http: blocking::Client::builder()
                     .cookie_store(true)
-                    .resolve(
-                        "api.domrobot.com",
-                        (Ipv4Addr::new(185, 181, 104, 26), 443).into(),
-                    )
-                    .resolve(
-                        "api.ote.domrobot.com",
-                        (Ipv4Addr::new(185, 181, 104, 52), 443).into(),
-                    )
+                    .resolve(ep.domain(), addr)
                     .build()?,
                 endpoint: ep,
             }),
