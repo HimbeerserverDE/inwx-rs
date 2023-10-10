@@ -5,7 +5,7 @@ use serde_derive::{Deserialize, Serialize};
 
 /// Optional search constraints to find nameserver records
 /// the account has access to.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct RecordInfo {
     #[serde(rename = "domain")]
     pub domain_name: Option<String>,
@@ -36,7 +36,7 @@ impl Response<RecordInfoResponse> for RecordInfo {}
 
 /// Update the records with the specified IDs.
 /// Any `None` variants will remain unchanged.
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct RecordUpdate {
     #[serde(rename = "id")]
     pub ids: Vec<i32>,
