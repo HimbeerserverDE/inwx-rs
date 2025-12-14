@@ -12,7 +12,7 @@ pub struct RecordInfo {
     #[serde(rename = "roId")]
     pub domain_id: Option<i32>,
     #[serde(rename = "recordId")]
-    pub record_id: Option<i32>,
+    pub record_id: Option<String>,
     #[serde(rename = "type")]
     pub record_type: Option<String>,
     pub name: Option<String>,
@@ -39,7 +39,7 @@ impl Response<RecordInfoResponse> for RecordInfo {}
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct RecordUpdate {
     #[serde(rename = "id")]
-    pub ids: Vec<i32>,
+    pub ids: Vec<String>,
     pub name: Option<String>,
     #[serde(rename = "type")]
     pub record_type: Option<String>,

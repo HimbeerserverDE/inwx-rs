@@ -8,7 +8,7 @@ type DateTime = String;
 /// A nameserver record. Contains DNS information as well as INWX metadata.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Record {
-    pub id: i32,
+    pub id: String,
     pub name: String,
     #[serde(rename = "type")]
     pub record_type: String,
